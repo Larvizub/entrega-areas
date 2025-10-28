@@ -1,0 +1,1551 @@
+/* Variables CSS para el diseño minimalista */
+:root {
+  --color-primary: #2d2d2d;
+  --color-secondary: #6b6b6b;
+  --color-background: #fafafa;
+  --color-surface: #ffffff;
+  --color-border: #e5e5e5;
+  --color-border-light: #f0f0f0;
+  --color-accent: #000000;
+  --color-text-primary: #2d2d2d;
+  --color-text-secondary: #6b6b6b;
+  --color-text-muted: #9b9b9b;
+  --color-hover-subtle: rgba(45, 45, 45, 0.05);
+  --color-hover-light: rgba(45, 45, 45, 0.02);
+  --color-hover-medium: rgba(45, 45, 45, 0.1);
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --border-radius: 8px;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+  --shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos para prevenir zoom en móviles */
+* {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Permitir selección en inputs y textareas */
+input, textarea, select {
+  -webkit-user-select: text;
+  -khtml-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-touch-callout: default;
+}
+
+/* Restaurar apariencia nativa para checkboxes y radios (no deben perderse) */
+input[type="checkbox"], input[type="radio"] {
+  -webkit-appearance: auto;
+  appearance: auto;
+  width: 18px;
+  height: 18px;
+  margin: 0 6px 0 0;
+  vertical-align: middle;
+  accent-color: var(--color-accent);
+}
+
+/* Mejorar visibilidad en modo oscuro */
+@media (prefers-color-scheme: dark) {
+  input[type="checkbox"], input[type="radio"] {
+    accent-color: var(--color-accent);
+    filter: none;
+  }
+}
+
+/* Prevenir zoom en inputs en iOS */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="url"],
+input[type="search"],
+textarea,
+select {
+  font-size: 16px !important;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+
+/* Estilos para aplicación móvil */
+html, body {
+  height: 100%;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Prevenir scroll horizontal */
+.container {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Estilos para elementos táctiles */
+button, .btn, input, textarea, select {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  touch-action: manipulation;
+}
+
+/* Mejorar experiencia táctil en botones */
+.btn {
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Estilos para modo oscuro */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-primary: #e5e5e5;
+    --color-secondary: #b0b0b0;
+    --color-background: #1a1a1a;
+    --color-surface: #2d2d2d;
+    --color-border: #404040;
+    --color-border-light: #353535;
+    --color-accent: #ffffff;
+    --color-text-primary: #e5e5e5;
+    --color-text-secondary: #b0b0b0;
+    --color-text-muted: #808080;
+    --color-hover-subtle: rgba(255, 255, 255, 0.05);
+    --color-hover-light: rgba(255, 255, 255, 0.02);
+    --color-hover-medium: rgba(255, 255, 255, 0.1);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* Reset y estilos base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  line-height: 1.6;
+  font-size: 16px;
+  min-height: 100vh;
+}
+
+/* Asegurar que el header no se encoja */
+.header {
+  flex-shrink: 0;
+}
+
+/* Componentes base */
+.container {
+  width: 100%;
+  max-width: 1400px; /* permitir más anchura en pantallas grandes */
+  margin: 0 auto;
+  padding: var(--spacing-md);
+  box-sizing: border-box;
+}
+
+@media (max-width: 767px) {
+  .container {
+    padding: calc(var(--spacing-md) * 0.75);
+  }
+  .grid-2, .grid-3 {
+    grid-template-columns: 1fr; /* forzar 1 columna en móvil */
+    gap: var(--spacing-md);
+  }
+  .form-input, .form-select, .form-textarea {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 0.95rem;
+  }
+  .btn { width: 100%; justify-content: center; }
+  .form-actions .btn { width: auto; }
+}
+
+.card {
+  background: var(--color-surface);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+}
+
+.card-header {
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.card-body {
+  padding: var(--spacing-lg);
+}
+
+/* Logo en header */
+.logo-header {
+  border-radius: 4px;
+  object-fit: contain;
+}
+
+/* Flexbox utilities */
+.flex {
+  display: flex;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+/* Botones */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border: none; /* Sin bordes completamente */
+  border-radius: var(--border-radius);
+  background: transparent; /* Transparente por defecto */
+  color: var(--color-text-primary);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  gap: var(--spacing-sm);
+  min-height: 44px;
+}
+
+.btn:hover {
+  background: var(--color-border-light); /* Usa variables CSS */
+  border: none; /* Sin bordes en hover */
+}
+
+.btn-primary {
+  background: var(--color-accent);
+  color: var(--color-background);
+  border: none; /* Sin bordes incluso para primary */
+}
+
+.btn-primary:hover {
+  background: var(--color-primary); /* Usa variables CSS */
+  color: var(--color-background);
+  border: none;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: none;
+}
+
+.btn-secondary:hover {
+  background: var(--color-border); /* Usa variables CSS */
+  border: none;
+}
+
+.btn-ghost {
+  background: transparent;
+  border: none;
+}
+
+.btn-ghost:hover {
+  background: var(--color-border-light); /* Usa variables CSS */
+  border: none;
+}
+
+.btn-sm {
+  padding: var(--spacing-xs) var(--spacing-md);
+  font-size: 0.8rem;
+  min-height: 36px;
+}
+
+.btn-lg {
+  padding: var(--spacing-md) var(--spacing-xl);
+  font-size: 1rem;
+  min-height: 48px;
+}
+
+.btn-danger {
+  background: #dc3545;
+  color: white;
+  border: none;
+}
+
+.btn-danger:hover {
+  background: #c82333;
+  border: none;
+}
+
+/* Alertas */
+.alert {
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius);
+  margin-bottom: var(--spacing-lg);
+  border: 1px solid transparent;
+}
+
+.alert-warning {
+  background: #fff3cd;
+  color: #856404;
+  border-color: #ffeaa7;
+}
+
+.alert-warning strong {
+  color: #856404;
+}
+
+/* Utilidades responsive */
+.hide-mobile {
+  display: inline;
+}
+
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none;
+  }
+}
+
+/* Formularios */
+.form-group {
+  margin-bottom: var(--spacing-lg);
+}
+
+.form-label {
+  display: block;
+  margin-bottom: var(--spacing-sm);
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: var(--color-text-primary);
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  font-size: 0.875rem;
+  font-weight: 400;
+  transition: all 0.3s ease;
+  min-height: 44px;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Evitar overflow en inputs en pantallas pequeñas */
+.form-input, .form-select, .form-textarea { box-sizing: border-box; max-width: 100%; }
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  background: var(--color-hover-light); /* Fondo muy sutil */
+  box-shadow: var(--shadow-md); /* Sombra más prominente en focus */
+}
+
+/* Estilos consistentes para placeholders */
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: var(--color-text-muted);
+  font-style: normal;
+  opacity: 1;
+}
+
+/* Mejoras para disabled inputs */
+.form-input:disabled,
+.form-select:disabled,
+.form-textarea:disabled {
+  background: var(--color-border-light);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Estilos específicos para las opciones de select en modo oscuro */
+.form-select option {
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  padding: var(--spacing-sm);
+}
+
+/* Estilos mejorados para select en diferentes navegadores */
+.form-select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right var(--spacing-md) center;
+  background-size: 1rem;
+  padding-right: calc(var(--spacing-xl) + 0.75rem);
+}
+
+/* Forzar estilos para opciones en modo oscuro */
+@media (prefers-color-scheme: dark) {
+  .form-select {
+    color-scheme: dark;
+  }
+  
+  .form-select option {
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+  }
+  
+  .form-select option:checked {
+    background: var(--color-primary);
+    color: var(--color-background);
+  }
+}
+
+.form-textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.form-checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.form-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-accent);
+}
+
+/* Layout */
+.header {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--spacing-lg) 0 0 0; /* Quitar padding bottom para mejor control */
+  margin-bottom: var(--spacing-xl);
+  flex-shrink: 0; /* No permitir que se encoja */
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  margin-bottom: calc(var(--spacing-xl) + var(--spacing-md)); /* Más espacio en desktop */
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  margin-top: var(--spacing-sm); /* Bajar ligeramente el botón de login */
+}
+
+.header-title {
+  font-size: 1.75rem; /* Título ligeramente más grande en desktop */
+  line-height: 1.2;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0; /* Quitar márgenes por defecto */
+}
+
+.nav-container {
+  padding-bottom: var(--spacing-xl); /* Más padding bottom en desktop */
+}
+
+.nav {
+  display: flex;
+  gap: var(--spacing-lg); /* Más espacio entre botones de navegación en desktop */
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center; /* Centrar navegación en desktop */
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius);
+  background: transparent; /* Transparente por defecto */
+  border: none; /* Sin bordes */
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 90px; /* Botones ligeramente más anchos en desktop */
+  gap: var(--spacing-xs);
+  position: relative;
+  z-index: 10;
+  pointer-events: auto;
+  user-select: none;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.nav-item:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.nav-item:active {
+  transform: none;
+}
+
+button.nav-item {
+  border: none;
+  background: transparent;
+  color: inherit;
+}
+
+button.nav-item:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.nav-item:hover {
+  background: var(--color-hover-medium); /* Fondo más oscuro y sutil */
+  border: none; /* Sin bordes */
+  box-shadow: none; /* Sin sombra */
+}
+
+.nav-item.active {
+  background: var(--color-accent);
+  color: var(--color-background);
+  border: none; /* Sin bordes incluso para active */
+  box-shadow: var(--shadow-md);
+}
+
+.nav-item.active .nav-icon {
+  color: var(--color-background);
+}
+
+.nav-icon {
+  font-size: 1.25rem;
+  color: var(--color-text-secondary);
+  transition: all 0.3s ease;
+}
+
+.nav-item:hover .nav-icon {
+  color: var(--color-text-primary); /* Más oscuro que el color primario */
+}
+
+.nav-item:hover .nav-label {
+  color: var(--color-text-primary); /* También más oscuro */
+  font-weight: 600; /* Más bold en hover */
+}
+
+.nav-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+/* Grid y Layout */
+.grid {
+  display: grid;
+  gap: var(--spacing-lg);
+}
+
+.grid-2 {
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.grid-3 {
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.gap-sm {
+  gap: var(--spacing-sm);
+}
+
+.gap-md {
+  gap: var(--spacing-md);
+}
+
+.gap-lg {
+  gap: var(--spacing-lg);
+}
+
+/* Utilidades */
+.text-center {
+  text-align: center;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+.text-xs {
+  font-size: 0.75rem;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.text-muted {
+  color: var(--color-text-muted);
+}
+
+.text-secondary {
+  color: var(--color-text-secondary);
+}
+
+.mb-0 {
+  margin-bottom: 0;
+}
+
+.mb-sm {
+  margin-bottom: var(--spacing-sm);
+}
+
+.mb-md {
+  margin-bottom: var(--spacing-md);
+}
+
+.mb-lg {
+  margin-bottom: var(--spacing-lg);
+}
+
+.mt-sm {
+  margin-top: var(--spacing-sm);
+}
+
+.mt-md {
+  margin-top: var(--spacing-md);
+}
+
+.mt-lg {
+  margin-top: var(--spacing-lg);
+}
+
+.p-sm {
+  padding: var(--spacing-sm);
+}
+
+.p-md {
+  padding: var(--spacing-md);
+}
+
+.p-lg {
+  padding: var(--spacing-lg);
+}
+
+/* Componentes específicos */
+.login-container {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+/* Mejoras para desktop */
+@media (min-width: 769px) {
+  .login-container {
+    margin-top: var(--spacing-xs); /* Alineación fina en desktop */
+  }
+}
+
+.user-info {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.logo {
+  max-width: 200px;
+  height: auto;
+  margin-bottom: var(--spacing-lg);
+}
+
+/* Logo más pequeño y centrado para la vista de acta/printable */
+.printable .logo {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 120px; /* reducir tamaño */
+  margin-bottom: var(--spacing-md);
+}
+
+/* Utilidad para centrar logos en otros contextos */
+.logo-centered {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.search-container {
+  margin-bottom: var(--spacing-xl);
+}
+
+.search-input {
+  width: 100%;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  font-size: 1rem;
+  font-weight: 400;
+  transition: all 0.3s ease;
+  min-height: 48px; /* Ligeramente más alto para búsquedas */
+  box-shadow: var(--shadow-sm);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  background: var(--color-hover-light);
+  box-shadow: var(--shadow-md);
+}
+
+.search-input::placeholder {
+  color: var(--color-text-muted);
+  font-style: normal;
+}
+
+.infrastructure-item {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+}
+
+.infrastructure-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-md);
+  color: var(--color-text-primary);
+}
+
+.result-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.result-card:hover {
+  background: var(--color-hover-subtle); /* Fondo sutil sin sombras ni bordes */
+}
+
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.result-title-section {
+  flex: 1;
+}
+
+.result-delete-btn {
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.result-delete-btn:hover {
+  opacity: 1;
+}
+
+.result-card:hover .result-delete-btn {
+  opacity: 1;
+}
+
+.result-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.result-date {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+/* Tabla */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-surface);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.table th,
+.table td {
+  padding: var(--spacing-md);
+  text-align: left;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+/* Wrapper para hacer tablas responsive con scroll horizontal en móvil */
+.table-wrapper { width: 100%; overflow-x: auto; }
+
+.table th {
+  background: var(--color-background);
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--color-text-primary);
+}
+
+.table td {
+  font-size: 0.875rem;
+}
+
+.table tr:hover {
+  background: var(--color-hover-subtle); /* Fondo sutil consistente */
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--spacing-md);
+}
+
+.modal {
+  background: var(--color-surface);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-lg);
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.modal-body {
+  padding: var(--spacing-lg);
+}
+
+.modal-footer {
+  padding: var(--spacing-lg);
+  border-top: 1px solid var(--color-border-light);
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: flex-end;
+}
+
+.modal-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+/* Spinner */
+.spinner-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--color-border);
+  border-top: 3px solid var(--color-accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Imagen upload */
+.image-upload {
+  border: 2px dashed var(--color-border);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-lg);
+  text-align: center;
+  background: var(--color-background);
+  margin-top: var(--spacing-md);
+}
+
+.image-preview {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: var(--border-radius);
+  margin-top: var(--spacing-md);
+}
+
+/* Tags */
+.tag {
+  display: inline-block;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: calc(var(--border-radius) / 2);
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-right: var(--spacing-xs);
+  margin-bottom: var(--spacing-xs);
+}
+
+.tag-new {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.tag-existing {
+  background: #fffbeb;
+  color: #d97706;
+  border: 1px solid #fde68a;
+}
+
+/* Print styles */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  
+  .printable, 
+  .printable * {
+    visibility: visible;
+  }
+  
+  .printable {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+  
+  .btn,
+  .nav,
+  .header {
+    display: none !important;
+  }
+  
+  @page {
+    size: A4;
+    margin: 2cm;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: var(--spacing-sm);
+  }
+  
+  .header {
+    padding: var(--spacing-md) 0;
+  }
+  
+  .header-content {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg); /* Menos espacio en móvil */
+    align-items: center; /* Centrar en móvil */
+  }
+  
+  .header-left,
+  .header-right {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .nav-container {
+    padding-bottom: var(--spacing-md); /* Menos padding en móvil */
+  }
+  
+  .header-title {
+    font-size: 1.25rem;
+    margin-bottom: var(--spacing-sm);
+  }
+  
+  .nav {
+    justify-content: center;
+    width: 100%;
+    gap: var(--spacing-lg);
+  }
+  
+  .nav-item {
+    min-width: 70px;
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+  
+  .login-container {
+    order: -1; /* Mover login arriba del título en móvil */
+    margin-bottom: var(--spacing-sm);
+  }
+  
+  .modal {
+    margin: var(--spacing-md);
+    max-width: none;
+  }
+  
+  .grid-2,
+  .grid-3 {
+    grid-template-columns: 1fr;
+  }
+  
+  .result-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+  
+  .result-delete-btn {
+    align-self: flex-end !important;
+    margin-top: var(--spacing-xs);
+    padding: 0.25rem !important;
+    font-size: 0.75rem !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    max-width: 32px !important;
+    max-height: 32px !important;
+    opacity: 0.6 !important; /* Más transparente en móvil para ser menos prominente */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  .table {
+    font-size: 0.8rem;
+  }
+  
+  .table th,
+  .table td {
+    padding: var(--spacing-sm);
+  }
+  
+  /* Ajustes para inputs en móvil */
+  .search-input {
+    font-size: 0.9rem;
+    min-height: 44px; /* Mantener altura táctil */
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+  
+  .form-input,
+  .form-select,
+  .form-textarea {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 0.875rem;
+  }
+  
+  .footer-content {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--spacing-xs);
+  }
+  
+  .footer-left,
+  .footer-right {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .footer-text {
+    font-size: 0.8rem;
+  }
+}
+
+/* Media query para móvil - más espacio para los botones */
+@media (max-width: 768px) {
+  body {
+    padding-bottom: 120px; /* Más espacio en móvil para los botones */
+  }
+  
+  /* Espacio adicional para los contenedores con botones */
+  .form-actions,
+  .button-group,
+  .btn-container {
+    margin-bottom: var(--spacing-xl);
+    padding-bottom: var(--spacing-lg);
+  }
+}
+
+/* Espaciado adicional para botones en desktop */
+.form-actions,
+.button-group,
+.btn-container {
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-md);
+}
+
+/* Botones adicionales */
+.btn-lg {
+  padding: var(--spacing-md) var(--spacing-xl);
+  font-size: 1rem;
+  min-height: 48px;
+}
+
+/* Asegurar que todos los tipos de input también siguen el principio minimalista */
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+button {
+  border: none !important; /* Quitar completamente cualquier borde */
+  transition: all 0.3s ease;
+}
+
+input[type="button"]:hover,
+input[type="submit"]:hover,
+input[type="reset"]:hover,
+button:hover {
+  border: none !important; /* Sin bordes en hover */
+}
+
+/* Elementos clickeables adicionales */
+.clickeable {
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.clickeable:hover {
+  background: var(--color-hover-subtle);
+  border: none;
+}
+
+/* Botones de archivo (file inputs) */
+.btn-file {
+  position: relative;
+  overflow: hidden;
+  background: transparent;
+  border: none;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-file:hover {
+  background: var(--color-hover-medium);
+  border: none;
+}
+
+.btn-file input[type="file"] {
+  position: absolute;
+  left: -9999px;
+  opacity: 0;
+}
+
+/* Links que actúan como botones */
+a.btn {
+  text-decoration: none;
+  border: none;
+}
+
+a.btn:hover {
+  text-decoration: none;
+  border: none;
+}
+
+/* Estilos específicos para inputs de archivo */
+input[type="file"] {
+  width: 100%;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  font-size: 0.875rem;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-height: 44px;
+  box-shadow: var(--shadow-sm);
+}
+
+input[type="file"]:hover {
+  background: var(--color-hover-subtle);
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-md);
+}
+
+input[type="file"]:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  background: var(--color-hover-light);
+  box-shadow: var(--shadow-md);
+}
+
+/* Footer (estático) */
+.footer {
+  position: static; /* No fijo, se sitúa en el flujo normal del documento */
+  width: 100%;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  padding: var(--spacing-lg) 0;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.footer-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.footer-left,
+.footer-right {
+  display: flex;
+  align-items: center;
+}
+
+.footer-text {
+  font-size: 0.875rem;
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.footer-text.text-muted {
+  color: var(--color-text-muted);
+}
+
+/* Footer responsive para móvil */
+@media (max-width: 768px) {
+  .footer-content {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--spacing-xs);
+  }
+  
+  .footer-left,
+  .footer-right {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .footer-text {
+    font-size: 0.8rem;
+  }
+}
+
+/* Media query para móvil - más espacio para los botones */
+@media (max-width: 768px) {
+  body {
+    /* No reservar espacio extra para footer estático */
+    padding-bottom: 0;
+  }
+  
+  /* Espacio adicional para los contenedores con botones */
+  .form-actions,
+  .button-group,
+  .btn-container {
+    margin-bottom: var(--spacing-xl);
+    padding-bottom: var(--spacing-lg);
+  }
+}
+
+  /* Layout: garantizar que el footer quede en la parte inferior cuando la página es corta */
+  html, body, #app, .app-root {
+    height: 100%;
+  }
+  .app-root {
+    display: flex;
+    flex-direction: column;
+  }
+  .app-content {
+    flex: 1 1 auto; /* ocupar espacio disponible y empujar el footer abajo */
+    display: flex;
+    flex-direction: column;
+  }
+
+/* Asegurar que todos los iconos FontAwesome sean visibles en ambos modos */
+i[class^="fas fa-"],
+i[class*=" fas fa-"],
+.fas {
+  color: inherit; /* Hereda el color del elemento padre */
+}
+
+/* Iconos en botones específicos */
+.btn i[class^="fas fa-"],
+.btn i[class*=" fas fa-"] {
+  color: inherit;
+  opacity: 1;
+}
+
+/* Iconos en navegación */
+.nav-item i[class^="fas fa-"],
+.nav-item i[class*=" fas fa-"] {
+  color: inherit;
+}
+
+/* Estilos para hallazgos en actas de entrega */
+.hallazgo-item {
+  padding: 0.8rem;
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+  border-left: 3px solid var(--color-secondary);
+  background: var(--color-border-light);
+  color: var(--color-text-primary);
+}
+
+.hallazgo-item strong {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.hallazgo-item img {
+  margin-top: 10px;
+  max-width: 200px;
+  max-height: 150px;
+  border-radius: 4px;
+  border: 1px solid var(--color-border);
+}
+
+/* Estilos para el contenido del acta imprimible */
+.printable .hallazgo-item {
+  background: var(--color-border-light);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+}
+
+/* Asegurar que el texto sea visible en modo oscuro */
+.printable .card-body,
+.printable .card-header,
+.printable h1,
+.printable h2,
+.printable h3,
+.printable h4,
+.printable p,
+.printable div,
+.printable span {
+  color: var(--color-text-primary) !important;
+}
+
+.printable .font-semibold {
+  color: var(--color-text-primary) !important;
+  font-weight: 600;
+}
+
+/* Mejorar contraste en modo oscuro para elementos de la impresión */
+@media (prefers-color-scheme: dark) {
+  .printable .hallazgo-item {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+  }
+  
+  .printable .hallazgo-item strong {
+    color: #ffffff;
+  }
+}
+
+/* Evitar que elementos hijos provoquen overflow horizontal */
+img, .logo, .logo-header, .hallazgo-item img, .printable img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Asegurar que tarjetas y tablas puedan reducirse dentro de contenedores flex/grid */
+.card, .result-card, .table {
+  min-width: 0;
+}
+
+/* Asegurar que el contenedor principal nunca exceda el viewport */
+html, body { overflow-x: hidden; }
+
+/* Mejoras específicas para la tabla de usuarios */
+.table.usuarios-table th,
+.table.usuarios-table td {
+  padding: 1rem 1.25rem;
+}
+
+.table.usuarios-table th {
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-primary);
+}
+
+.table.usuarios-table td {
+  vertical-align: middle;
+}
+
+.table.usuarios-table .user-name {
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.table.usuarios-table .user-email {
+  color: var(--color-text-secondary);
+  word-break: break-word;
+  max-width: 250px;
+}
+
+.table.usuarios-table .user-role {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.table.usuarios-table .user-date {
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+}
+
+.table.usuarios-table .actions-column {
+  width: 120px;
+  text-align: center;
+}
+
+.table.usuarios-table .action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.table.usuarios-table .action-btn {
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.table.usuarios-table .action-btn:hover {
+  transform: translateY(-1px);
+}
+
+.table.usuarios-table .action-btn.edit {
+  color: #000000; /* Negro en modo claro */
+}
+
+.table.usuarios-table .action-btn.edit:hover {
+  background-color: rgba(37, 99, 235, 0.1);
+  color: #2563eb; /* Azul en hover */
+}
+
+.table.usuarios-table .action-btn.delete {
+  color: #000000; /* Negro en modo claro */
+}
+
+.table.usuarios-table .action-btn.delete:hover {
+  background-color: rgba(220, 38, 38, 0.1);
+  color: #dc2626; /* Rojo en hover */
+}
+
+/* Tema oscuro para botones de acción */
+@media (prefers-color-scheme: dark) {
+  .table.usuarios-table .action-btn.edit {
+    color: #ffffff; /* Blanco en modo oscuro */
+  }
+
+  .table.usuarios-table .action-btn.edit:hover {
+    background-color: rgba(96, 165, 250, 0.15);
+    color: #60a5fa; /* Azul claro en hover */
+  }
+
+  .table.usuarios-table .action-btn.delete {
+    color: #ffffff; /* Blanco en modo oscuro */
+  }
+
+  .table.usuarios-table .action-btn.delete:hover {
+    background-color: rgba(248, 113, 113, 0.15);
+    color: #f87171; /* Rojo claro en hover */
+  }
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+  .table.usuarios-table th,
+  .table.usuarios-table td {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .table.usuarios-table .user-email {
+    max-width: 150px;
+    font-size: 0.8rem;
+  }
+
+  .table.usuarios-table .actions-column {
+    width: 100px;
+  }
+}

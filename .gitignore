@@ -1,0 +1,68 @@
+/node_modules/
+/dist/
+/.env
+/.env.*
+/.firebase/
+/.firebase/*.json
+/functions/.env
+/functions/.env.*
+/.DS_Store
+/.idea/
+/.vscode/
+/.parcel-cache/
+/.cache/
+/.pnpm-store/
+/npm-debug.log*
+/yarn-debug.log*
+/yarn-error.log*
+pnpm-lock.yaml
+.DS_Store
+*.log
+
+# Build output
+/dist
+
+# Local env files
+.env
+.env.local
+.env.*.local
+
+# Firebase
+.firebase/
+.firebase.*
+
+# Ignore secrets file if any
+secrets.json
+
+# Ignore compiled assets
+src/**/*.map
+
+# Ignore local credential files
+credentials.json
+
+# Keep lockfiles out? If you prefer to include locks, remove pnpm-lock.yaml entry
+
+# Node runtime
+/.pnp.cjs
+.pnp.js
+
+# macOS
+*.DS_Store
+
+# Windows
+Thumbs.db
+
+# VS Code
+.vscode/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# Ignore system files
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
