@@ -66,3 +66,6 @@ yarn-debug.log*
 *.ntvs*
 *.njsproj
 *.sln
+
+# Ignore node_modules inside functions (these are installed in CI/deploy or by devs locally)
+/functions/node_modules/
