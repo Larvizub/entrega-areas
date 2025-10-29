@@ -12,6 +12,9 @@ const ModuloReporteDanos = ({ entregas }) => {
   const [danosFiltrados, setDanosFiltrados] = useState([])
   const [showSpinner, setShowSpinner] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [showPhotosModal, setShowPhotosModal] = useState(false)
+  const [photosForModal, setPhotosForModal] = useState([])
+  const [photosModalTitle, setPhotosModalTitle] = useState('Fotografías')
 
   useEffect(() => {
     const danosAcumulados = []
@@ -28,7 +31,7 @@ const ModuloReporteDanos = ({ entregas }) => {
                 comentarios: item.comentarios,
                 estado: item.estado,
                 hallazgo: item.hallazgo,
-                precio: 0,
+                precio: '',
                 imagenUrl: Array.isArray(item.imagenUrl) ? item.imagenUrl : (item.imagenUrl ? [item.imagenUrl] : []),
                 imagenId: Array.isArray(item.imagenId) ? item.imagenId : (item.imagenId ? [item.imagenId] : []),
               })
@@ -52,8 +55,10 @@ const ModuloReporteDanos = ({ entregas }) => {
   }, [busqueda, danosState])
 
   const handlePrecioChange = (index, value) => {
+    // Allow free-form input while typing (keep as string). Normalize comma to dot so Number() parses correctly.
+    const normalized = typeof value === 'string' ? value.replace(',', '.') : value
     const newList = [...danosFiltrados]
-    newList[index].precio = parseFloat(value) || 0
+    newList[index].precio = normalized
     setDanosFiltrados(newList)
   }
 
@@ -212,35 +217,36 @@ const ModuloReporteDanos = ({ entregas }) => {
                             {d.comentarios || "N/A"}
                             {((Array.isArray(d.imagenUrl) && d.imagenUrl.length > 0) || (d.imagenUrl && !Array.isArray(d.imagenUrl))) && (
                               <div className="mt-sm">
-                                {(Array.isArray(d.imagenUrl) ? d.imagenUrl : [d.imagenUrl]).map((url, idx) => (
-                                  <img
-                                    key={idx}
-                                    src={url}
-                                    alt={`Imagen del daño ${idx + 1}`}
-                                    style={{ 
-                                      maxWidth: "100px", 
-                                      maxHeight: "80px",
-                                      cursor: "pointer",
-                                      borderRadius: "4px",
-                                      border: "1px solid var(--color-border)",
-                                      marginRight: "5px"
-                                    }}
-                                    onClick={() => window.open(url, "_blank")}
-                                  />
-                                ))}
+                                {/* Mostrar botón que abre modal en cuadrícula con las fotografías */}
+                                {(() => {
+                                  const images = Array.isArray(d.imagenUrl) ? d.imagenUrl : (d.imagenUrl ? [d.imagenUrl] : [])
+                                  return (
+                                    <button
+                                      className="btn btn-secondary btn-sm"
+                                      onClick={() => {
+                                        setPhotosForModal(images)
+                                        setPhotosModalTitle(`${d.nombreEvento} — ${d.salon} — ${d.infraestructura}`)
+                                        setShowPhotosModal(true)
+                                      }}
+                                    >
+                                      Fotografías ({images.length})
+                                    </button>
+                                  )
+                                })()}
                               </div>
                             )}
                           </div>
                         </td>
                         <td>
                           <input
-                            type="number"
+                            type="text"
+                            inputMode="decimal"
+                            pattern="[0-9]*[.,]?[0-9]*"
                             className="form-input"
                             style={{ width: '100px' }}
                             value={d.precio}
                             onChange={(e) => handlePrecioChange(i, e.target.value)}
-                            min="0"
-                            step="0.01"
+                            placeholder="0.00"
                           />
                         </td>
                       </tr>
@@ -290,6 +296,30 @@ const ModuloReporteDanos = ({ entregas }) => {
           >
             Aceptar
           </button>
+        </div>
+      </Modal>
+
+      {/* Modal para mostrar fotografías en cuadrícula */}
+      <Modal
+        isOpen={showPhotosModal}
+        onClose={() => setShowPhotosModal(false)}
+        title={photosModalTitle}
+      >
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '12px' }}>
+          {photosForModal && photosForModal.length > 0 ? (
+            photosForModal.map((url, idx) => (
+              <div key={idx} style={{ textAlign: 'center' }}>
+                <img
+                  src={url}
+                  alt={`Foto ${idx + 1}`}
+                  style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: 6, cursor: 'pointer', border: '1px solid var(--color-border)' }}
+                  onClick={() => window.open(url, '_blank')}
+                />
+              </div>
+            ))
+          ) : (
+            <div>No hay fotografías</div>
+          )}
         </div>
       </Modal>
     </div>

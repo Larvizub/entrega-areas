@@ -889,6 +889,7 @@ button.nav-item:focus {
 .modal-header {
   padding: var(--spacing-lg);
   border-bottom: 1px solid var(--color-border-light);
+  position: relative; /* necesario para contener el botón de cierre posicionado en absoluto */
 }
 
 .modal-body {
@@ -907,6 +908,28 @@ button.nav-item:focus {
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--color-text-primary);
+}
+
+/* Botón de cierre del modal (esquina superior derecha) */
+.modal-close-button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: 1.25rem;
+  line-height: 1;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.modal-close-button:hover,
+.modal-close-button:focus {
+  background: var(--color-hover-light);
+  color: var(--color-text-primary);
+  outline: none;
 }
 
 /* Spinner */
