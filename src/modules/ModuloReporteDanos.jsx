@@ -15,6 +15,9 @@ const ModuloReporteDanos = ({ entregas }) => {
   const [showPhotosModal, setShowPhotosModal] = useState(false)
   const [photosForModal, setPhotosForModal] = useState([])
   const [photosModalTitle, setPhotosModalTitle] = useState('Fotografías')
+  const [isMobile, setIsMobile] = useState(false)
+  const [showCommentModal, setShowCommentModal] = useState(false)
+  const [commentForModal, setCommentForModal] = useState('')
 
   useEffect(() => {
     const danosAcumulados = []
@@ -53,6 +56,14 @@ const ModuloReporteDanos = ({ entregas }) => {
     )
     setDanosFiltrados(filtered)
   }, [busqueda, danosState])
+
+  useEffect(() => {
+    // Detectar vista móvil para mostrar botón de comentario en lugar de texto largo
+    const onResize = () => setIsMobile(typeof window !== 'undefined' && window.innerWidth <= 768)
+    onResize()
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
 
   const handlePrecioChange = (index, value) => {
     // Allow free-form input while typing (keep as string). Normalize comma to dot so Number() parses correctly.
@@ -214,25 +225,63 @@ const ModuloReporteDanos = ({ entregas }) => {
                         </td>
                         <td>
                           <div>
-                            {d.comentarios || "N/A"}
-                            {((Array.isArray(d.imagenUrl) && d.imagenUrl.length > 0) || (d.imagenUrl && !Array.isArray(d.imagenUrl))) && (
-                              <div className="mt-sm">
-                                {/* Mostrar botón que abre modal en cuadrícula con las fotografías */}
-                                {(() => {
-                                  const images = Array.isArray(d.imagenUrl) ? d.imagenUrl : (d.imagenUrl ? [d.imagenUrl] : [])
-                                  return (
-                                    <button
-                                      className="btn btn-secondary btn-sm"
-                                      onClick={() => {
-                                        setPhotosForModal(images)
-                                        setPhotosModalTitle(`${d.nombreEvento} — ${d.salon} — ${d.infraestructura}`)
-                                        setShowPhotosModal(true)
-                                      }}
-                                    >
-                                      Fotografías ({images.length})
-                                    </button>
-                                  )
-                                })()}
+                            {isMobile ? (
+                              // En móvil mostramos un botón que abre el comentario en modal para evitar celdas muy anchas
+                              <div className="flex gap-sm">
+                                {d.comentarios ? (
+                                  <button
+                                    className="btn btn-secondary btn-sm"
+                                    onClick={() => {
+                                      setCommentForModal(d.comentarios)
+                                      setShowCommentModal(true)
+                                    }}
+                                  >
+                                    Comentario
+                                  </button>
+                                ) : (
+                                  <span className="text-muted">N/A</span>
+                                )}
+
+                                {((Array.isArray(d.imagenUrl) && d.imagenUrl.length > 0) || (d.imagenUrl && !Array.isArray(d.imagenUrl))) && (
+                                  (() => {
+                                    const images = Array.isArray(d.imagenUrl) ? d.imagenUrl : (d.imagenUrl ? [d.imagenUrl] : [])
+                                    return (
+                                      <button
+                                        className="btn btn-secondary btn-sm"
+                                        onClick={() => {
+                                          setPhotosForModal(images)
+                                          setPhotosModalTitle(`${d.nombreEvento} — ${d.salon} — ${d.infraestructura}`)
+                                          setShowPhotosModal(true)
+                                        }}
+                                      >
+                                        Fotografías ({images.length})
+                                      </button>
+                                    )
+                                  })()
+                                )}
+                              </div>
+                            ) : (
+                              <div>
+                                {d.comentarios || "N/A"}
+                                {((Array.isArray(d.imagenUrl) && d.imagenUrl.length > 0) || (d.imagenUrl && !Array.isArray(d.imagenUrl))) && (
+                                  <div className="mt-sm">
+                                    {(() => {
+                                      const images = Array.isArray(d.imagenUrl) ? d.imagenUrl : (d.imagenUrl ? [d.imagenUrl] : [])
+                                      return (
+                                        <button
+                                          className="btn btn-secondary btn-sm"
+                                          onClick={() => {
+                                            setPhotosForModal(images)
+                                            setPhotosModalTitle(`${d.nombreEvento} — ${d.salon} — ${d.infraestructura}`)
+                                            setShowPhotosModal(true)
+                                          }}
+                                        >
+                                          Fotografías ({images.length})
+                                        </button>
+                                      )
+                                    })()}
+                                  </div>
+                                )}
                               </div>
                             )}
                           </div>
@@ -320,6 +369,23 @@ const ModuloReporteDanos = ({ entregas }) => {
           ) : (
             <div>No hay fotografías</div>
           )}
+        </div>
+      </Modal>
+
+      {/* Modal para mostrar comentario en móvil */}
+      <Modal
+        isOpen={showCommentModal}
+        onClose={() => setShowCommentModal(false)}
+        title="Comentario"
+      >
+        <p style={{ whiteSpace: 'pre-wrap' }}>{commentForModal}</p>
+        <div className="flex justify-center">
+          <button
+            onClick={() => setShowCommentModal(false)}
+            className="btn btn-primary"
+          >
+            Cerrar
+          </button>
         </div>
       </Modal>
     </div>
