@@ -55,8 +55,17 @@ export function App() {
     setShowSpinner(true)
     
     try {
+      const hasDamages = data.salones?.some(salon =>
+        salon.infraestructura?.some(item => item.esDano === true)
+      )
+      const payload = {
+        ...data,
+        requiereReporteDanos: !!hasDamages,
+        reporteDanosEnviado: false,
+        recordatorioEnviado: false
+      }
       // Guardar en Firebase
-      await saveEntrega(data)
+      await saveEntrega(payload)
       
       // Preparar las novedades encontradas para el correo
       const novedadesHtml = data.salones.map(salon => {

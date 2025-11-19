@@ -66,19 +66,26 @@ export const useEntregas = () => {
     )
     
     if (existingEntrega && existingEntrega.id) {
-      // Actualizar la entrega existente, manteniendo la fecha de creación
+      // Actualizar la entrega existente, manteniendo la fecha de creación y metas previas
       const entregaRef = ref(db, `entregas/${existingEntrega.id}`)
       const updatedData = {
+        ...existingEntrega,
         ...data,
-        fechaCreacion: existingEntrega.fechaCreacion, // Mantener fecha original
-        fechaActualizacion: new Date().toISOString()
+        fechaCreacion: existingEntrega.fechaCreacion,
+        fechaActualizacion: new Date().toISOString(),
+        reporteDanosEnviado: existingEntrega.reporteDanosEnviado ?? false,
+        recordatorioEnviado: existingEntrega.recordatorioEnviado ?? false
       }
       await set(entregaRef, updatedData)
       console.log('✅ Entrega actualizada:', existingEntrega.id)
     } else {
       // Crear nueva entrega
       const newRef = push(entregasRef)
-      await set(newRef, data)
+      const dataToPersist = {
+        ...data,
+        fechaActualizacion: new Date().toISOString()
+      }
+      await set(newRef, dataToPersist)
       console.log('✅ Nueva entrega creada')
     }
   }

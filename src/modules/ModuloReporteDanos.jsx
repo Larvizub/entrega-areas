@@ -3,6 +3,8 @@ import { getLogo } from '../utils/constants'
 import { sendEmailWithAccountViaFunction } from '../config/email'
 import { renderActaHtml } from '../config/emailTemplates'
 import { getPool } from '../config/emailPools'
+import { db } from '../config/firebase'
+import { ref, update } from 'firebase/database'
 import Modal from '../components/Modal'
 import Spinner from '../components/Spinner'
 
@@ -161,12 +163,34 @@ const ModuloReporteDanos = ({ entregas }) => {
 
     try {
       await sendEmailWithAccountViaFunction(templateParams)
+      await markDamageReportSent(nombreEvento)
       setShowSuccessModal(true)
     } catch (err) {
       console.error("Error al enviar el reporte:", err)
       alert("Error al enviar el reporte de daños")
     } finally {
       setShowSpinner(false)
+    }
+  }
+
+  const markDamageReportSent = async (eventName) => {
+    if (!eventName) return
+    const updates = {}
+    entregas.forEach(entrega => {
+      if (
+        entrega.id &&
+        entrega.nombreEvento === eventName &&
+        entrega.requiereReporteDanos &&
+        !entrega.reporteDanosEnviado
+      ) {
+        const basePath = `entregas/${entrega.id}`
+        updates[`${basePath}/reporteDanosEnviado`] = true
+        updates[`${basePath}/recordatorioEnviado`] = true
+        updates[`${basePath}/fechaActualizacion`] = new Date().toISOString()
+      }
+    })
+    if (Object.keys(updates).length > 0) {
+      await update(ref(db), updates)
     }
   }
 

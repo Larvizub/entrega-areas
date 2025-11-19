@@ -1,6 +1,11 @@
 const functions = require('firebase-functions')
 // Keep v1 API only to ensure Node.js 18 (Gen1) deployment per project requirement
 const fetch = globalThis.fetch || ((...args) => import('node-fetch').then(m => m.default(...args)))
+const admin = require('firebase-admin')
+if (!admin.apps.length) {
+  admin.initializeApp()
+}
+const dbAdmin = admin.database()
 
 // Support config via functions.config() or environment variables
 const cfg = functions.config()
@@ -9,11 +14,149 @@ const AZURE_CLIENT_ID = process.env.AZURE_CLIENT_ID || (cfg.azure && cfg.azure.c
 const AZURE_CLIENT_SECRET = process.env.AZURE_CLIENT_SECRET || (cfg.azure && cfg.azure.client_secret)
 const MS_GRAPH_FROM_USER = process.env.MS_GRAPH_FROM_USER || (cfg.ms && cfg.ms.from_user)
 const FUNCTIONS_SECRET = process.env.FUNCTIONS_SECRET || (cfg.security && cfg.security.functions_secret)
+const BUSINESS_START_HOUR = 8
+const BUSINESS_END_HOUR = 17
+const REMINDER_THRESHOLD_HOURS = 10
+const COSTA_RICA_OFFSET_MS = -6 * 60 * 60 * 1000
+const DAY_MS = 24 * 60 * 60 * 1000
+const ROOT_EMAIL_POOL = 'emailPools'
+const REVISION_POOL_KEY = 'revision_areas'
+const DEFAULT_REVISION_POOL = [
+  'planeacion.eventos@costaricacc.com',
+  'luis.arvizu@costaricacc.com',
+  'yoxsy.chaves@costaricacc.com',
+  'seguridad@costaricacc.com',
+  'infra@costaricacc.com',
+  'silvia.navarro@costaricacc.com',
+  'centralseguridad@costaricacc.com'
+]
 
 function buildRecipients(list) {
   if (!list) return []
   if (typeof list === 'string') list = list.split(',').map(s => s.trim()).filter(Boolean)
   return list.map(addr => ({ emailAddress: { address: addr } }))
+}
+
+const localDateFormatter = new Intl.DateTimeFormat('es-CR', {
+  dateStyle: 'medium',
+  timeStyle: 'short',
+  timeZone: 'America/Costa_Rica'
+})
+
+function normalizePoolValue(value) {
+  if (!value) return []
+  if (Array.isArray(value)) return value.filter(Boolean)
+  if (typeof value === 'string') return value.split(',').map(v => v.trim()).filter(Boolean)
+  return []
+}
+
+async function getRevisionPoolRecipients() {
+  try {
+    const snap = await dbAdmin.ref(`${ROOT_EMAIL_POOL}/${REVISION_POOL_KEY}`).get()
+    if (snap.exists()) {
+      const val = snap.val()
+      const resolved = normalizePoolValue(val)
+      if (resolved.length) return resolved
+    }
+  } catch (err) {
+    console.error('Error reading revision email pool:', err)
+  }
+  return [...DEFAULT_REVISION_POOL]
+}
+
+function formatCostaRicaDate(isoString) {
+  if (!isoString) return 'Sin fecha'
+  try {
+    return localDateFormatter.format(new Date(isoString))
+  } catch (err) {
+    return isoString
+  }
+}
+
+function countBusinessHoursBetween(startIso, nowUtcMs = Date.now()) {
+  if (!startIso) return 0
+  const startUtcMs = new Date(startIso).getTime()
+  if (Number.isNaN(startUtcMs)) return 0
+  const startLocalMs = startUtcMs + COSTA_RICA_OFFSET_MS
+  const currentLocalMs = nowUtcMs + COSTA_RICA_OFFSET_MS
+  if (currentLocalMs <= startLocalMs) return 0
+
+  let cursor = startLocalMs
+  let hours = 0
+
+  while (cursor < currentLocalMs) {
+    const snapshotDay = new Date(cursor)
+    const dayStartLocalMs = Date.UTC(
+      snapshotDay.getUTCFullYear(),
+      snapshotDay.getUTCMonth(),
+      snapshotDay.getUTCDate(),
+      0, 0, 0, 0
+    )
+    const dayOfWeek = new Date(dayStartLocalMs).getUTCDay()
+    if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+      const businessStart = dayStartLocalMs + BUSINESS_START_HOUR * 3600000
+      const businessEnd = dayStartLocalMs + BUSINESS_END_HOUR * 3600000
+      const from = Math.max(cursor, businessStart)
+      const to = Math.min(currentLocalMs, businessEnd)
+      if (to > from) {
+        hours += (to - from) / 3600000
+      }
+    }
+    cursor = dayStartLocalMs + DAY_MS
+  }
+
+  return hours
+}
+
+async function sendDamageReportReminderEmail(entries, recipients) {
+  if (!entries.length) return
+  const sender = MS_GRAPH_FROM_USER
+  if (!sender) throw new Error('Sender not configured (MS_GRAPH_FROM_USER)')
+
+  const subject = entries.length === 1
+    ? `Recordatorio | Envío de reporte de daños pendiente — ${entries[0].nombreEvento || 'Evento'}`
+    : `Recordatorio | ${entries.length} eventos sin reporte de daños`
+
+  const intro = `Han transcurrido más de ${REMINDER_THRESHOLD_HOURS} horas hábiles (8:00-17:00) desde que se guardó el acta, pero aún no se ha enviado el reporte de daños correspondiente.`
+  const items = entries.map(entry => ({
+    title: entry.nombreEvento || 'Evento sin nombre',
+    subtitle: `Recinto: ${entry.recinto || 'N/D'} · Creado: ${formatCostaRicaDate(entry.fechaCreacion)} · Horas hábiles: ${entry.businessHours.toFixed(1)}`
+  }))
+
+  const htmlContent = buildEmailHtml({
+    subject,
+    template: {
+      title: 'Recordatorio: Reporte de Daños pendiente',
+      intro,
+      items,
+      footer_text: 'Este recordatorio se genera automáticamente dentro del horario laboral (8:00-17:00) y sólo se envía una vez por acta.'
+    }
+  })
+
+  const accessToken = await getAccessToken()
+  const message = {
+    message: {
+      subject,
+      body: { contentType: 'HTML', content: htmlContent },
+      toRecipients: buildRecipients(recipients)
+    },
+    saveToSentItems: true
+  }
+
+  const graphUrl = `https://graph.microsoft.com/v1.0/users/${encodeURIComponent(sender)}/sendMail`
+  const res = await fetch(graphUrl, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(message)
+  })
+
+  if (!res.ok) {
+    const details = await res.text()
+    throw new Error(`Recordatorio: Graph API error ${res.status} ${details}`)
+  }
 }
 
 // Build a polished HTML email using inline styles that mirror the app's design system
@@ -310,3 +453,60 @@ exports.sendMailCallable = functions.https.onCall(async (data, context) => {
     throw new functions.https.HttpsError('internal', err.message)
   }
 })
+
+exports.recordatorioReporteDanos = functions.pubsub
+  .schedule('every 1 hours')
+  .timeZone('America/Costa_Rica')
+  .onRun(async () => {
+    try {
+      const nowUtc = Date.now()
+      const snapshot = await dbAdmin.ref('entregas').get()
+      if (!snapshot.exists()) return null
+
+      const pending = Object.entries(snapshot.val() || {}).reduce((acc, [id, entrega]) => {
+        if (
+          !id ||
+          !entrega ||
+          !entrega.requiereReporteDanos ||
+          entrega.reporteDanosEnviado ||
+          entrega.recordatorioEnviado
+        ) {
+          return acc
+        }
+        const createdAt = entrega.fechaCreacion || entrega.fechaActualizacion
+        const businessHours = countBusinessHoursBetween(createdAt, nowUtc)
+        if (businessHours >= REMINDER_THRESHOLD_HOURS) {
+          acc.push({
+            id,
+            nombreEvento: entrega.nombreEvento,
+            recinto: entrega.recinto,
+            fechaCreacion: createdAt,
+            businessHours
+          })
+        }
+        return acc
+      }, [])
+
+      if (!pending.length) return null
+
+      const recipients = await getRevisionPoolRecipients()
+      if (!recipients.length) return null
+
+      await sendDamageReportReminderEmail(pending, recipients)
+
+      const updates = {}
+      const nowIso = new Date().toISOString()
+      pending.forEach(entry => {
+        updates[`entregas/${entry.id}/recordatorioEnviado`] = true
+        updates[`entregas/${entry.id}/fechaActualizacion`] = nowIso
+      })
+      if (Object.keys(updates).length) {
+        await dbAdmin.ref().update(updates)
+      }
+
+      return null
+    } catch (err) {
+      console.error('recordatorioReporteDanos error:', err)
+      return null
+    }
+  })
