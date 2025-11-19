@@ -4,6 +4,7 @@
   "description": "App de Acta de Entrega de Áreas en Preact",
   "main": "index.js",
   "packageManager": "pnpm@10.20.0",
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
