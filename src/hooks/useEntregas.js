@@ -26,6 +26,9 @@ export const useEntregas = () => {
                   if (item.imagenId && !Array.isArray(item.imagenId)) {
                     item.imagenId = [item.imagenId]
                   }
+                  if (typeof item.notificarCliente === 'undefined') {
+                    item.notificarCliente = false
+                  }
                   return item
                 })
               }

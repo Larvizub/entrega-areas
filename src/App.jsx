@@ -111,10 +111,14 @@ export function App() {
           },
           salones: data.salones.map(s => ({
             salon: s.salon,
-            novedades: s.infraestructura.filter(i => i.estado === 'Novedad Encontrada').map(i => ({
+            novedades: s.infraestructura
+              .filter(i => i.estado === 'Novedad Encontrada')
+              .filter(i => i.hallazgo !== 'Existente' || i.notificarCliente)
+              .map(i => ({
               nombre: i.nombre,
               hallazgo: i.hallazgo,
               comentarios: i.comentarios,
+                notificarCliente: i.notificarCliente,
               imagenUrl: i.imagenUrl
             }))
           }))

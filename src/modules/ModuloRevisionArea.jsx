@@ -30,6 +30,7 @@ const ModuloRevisionArea = ({ onSave }) => {
     esDano: null,
     imagenUrl: [],
     imagenId: [],
+    notificarCliente: false
   }))
 
   const [salonesData, setSalonesData] = useState([
@@ -48,6 +49,9 @@ const ModuloRevisionArea = ({ onSave }) => {
   const handleInfraChange = (salonIndex, infraIndex, field, value) => {
     const newSalones = [...salonesData]
     newSalones[salonIndex].infraestructura[infraIndex][field] = value
+    if (field === 'hallazgo' && value !== 'Existente') {
+      newSalones[salonIndex].infraestructura[infraIndex].notificarCliente = false
+    }
     setSalonesData(newSalones)
   }
 
@@ -332,6 +336,38 @@ const ModuloRevisionArea = ({ onSave }) => {
                                   <span style={{ marginLeft: 6 }}>No</span>
                                 </label>
                               </div>
+                            </div>
+                          )}
+
+                          {/* Pregunta de notificación para hallazgos existentes */}
+                          {item.hallazgo === "Existente" && (
+                            <div className="form-group">
+                              <label className="form-label">Notificar al Cliente?</label>
+                              <div className="form-radio">
+                                <label style={{ marginRight: 12 }}>
+                                  <input
+                                    type="radio"
+                                    name={`notificar-${sIndex}-${iIndex}`}
+                                    value="si"
+                                    checked={item.notificarCliente === true}
+                                    onChange={() => handleInfraChange(sIndex, iIndex, 'notificarCliente', true)}
+                                  />
+                                  <span style={{ marginLeft: 6 }}>Sí</span>
+                                </label>
+                                <label>
+                                  <input
+                                    type="radio"
+                                    name={`notificar-${sIndex}-${iIndex}`}
+                                    value="no"
+                                    checked={item.notificarCliente === false}
+                                    onChange={() => handleInfraChange(sIndex, iIndex, 'notificarCliente', false)}
+                                  />
+                                  <span style={{ marginLeft: 6 }}>No</span>
+                                </label>
+                              </div>
+                              <p className="text-muted text-sm" style={{ marginTop: 6 }}>
+                                Selecciona "Sí" para incluir este hallazgo existente en el correo al cliente.
+                              </p>
                             </div>
                           )}
 
