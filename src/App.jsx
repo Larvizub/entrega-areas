@@ -55,7 +55,11 @@ export function App() {
     setShowSpinner(true)
     
     try {
-      const hasDamages = data.salones?.some(salon =>
+      const salones = (data.salones ?? []).map(salon => ({
+        ...salon,
+        infraestructura: salon.infraestructura ?? []
+      }))
+      const hasDamages = salones.some(salon =>
         salon.infraestructura?.some(item => item.esDano === true)
       )
       const payload = {
@@ -64,70 +68,73 @@ export function App() {
         reporteDanosEnviado: false,
         recordatorioEnviado: false
       }
-      // Guardar en Firebase
       await saveEntrega(payload)
       
-      // Preparar las novedades encontradas para el correo
-      const novedadesHtml = data.salones.map(salon => {
-        const novedades = salon.infraestructura
-          .filter(item => item.estado === "Novedad Encontrada")
-          .map(item => `
-            <div style="padding: 0.8rem; background: #f8f9fa; border-radius: 6px; margin-bottom: 0.5rem; border-left: 3px solid #6c757d; color: #333;">
-              <strong style="color: #333;">${item.nombre}:</strong> ${item.hallazgo || ""} ${item.comentarios || ""}
-              ${item.esDano && ((Array.isArray(item.imagenUrl) && item.imagenUrl.length > 0) || (item.imagenUrl && !Array.isArray(item.imagenUrl))) ? (Array.isArray(item.imagenUrl) ? item.imagenUrl : [item.imagenUrl]).map(url => `<div style="margin-top: 10px;"><img src="${url}" alt="Imagen del daño" style="max-width: 200px; max-height: 150px; border-radius: 4px; border: 1px solid #ddd;" /></div>`).join('') : ''}
-            </div>
-          `).join('')
-        
-        return novedades ? `
-          <div style="background: white; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #e9ecef;">
-            <h4 style="color: #495057; margin-bottom: 1rem; border-bottom: 1px solid #e9ecef; padding-bottom: 0.5rem;">
-              ${salon.salon}
-            </h4>
-            ${novedades}
-          </div>
-        ` : ''
-      }).join('')
-
-      // Preparar el template para el correo
       const defaultTo = "planeacion.eventos@costaricacc.com, luis.arvizu@costaricacc.com, yoxsy.chaves@costaricacc.com, seguridad@costaricacc.com, centralseguridad@costaricacc.com"
       const pool = await getPool('revision_areas')
       const poolStr = (pool && pool.length) ? pool.join(', ') : defaultTo
 
-      const templateParams = {
-        subject: `Acta de Entrega de Áreas | ${data.nombreEvento}`,
-        to_email: poolStr + (data.correoPersonaEntrega ? ", " + data.correoPersonaEntrega : ""),
-        body: renderActaHtml({
-          logo_url: getLogo(data.recinto),
-          title: 'Acta de Entrega de Áreas',
-          general: {
-            recinto: data.recinto,
-            nombreEvento: data.nombreEvento,
-            fechaEvento: data.fechaEvento,
-            tipo_entrega: data.tipoEntrega,
-            organizador: data.organizador,
-            encargado_entrega: data.encargadoEntrega,
-            persona_entrega: data.personaEntrega,
-            correo_persona: data.correoPersonaEntrega
-          },
-          salones: data.salones.map(s => ({
-            salon: s.salon,
-            novedades: s.infraestructura
-              .filter(i => i.estado === 'Novedad Encontrada')
-              .filter(i => i.hallazgo !== 'Existente' || i.notificarCliente)
-              .map(i => ({
-              nombre: i.nombre,
-              hallazgo: i.hallazgo,
-              comentarios: i.comentarios,
-                notificarCliente: i.notificarCliente,
-              imagenUrl: i.imagenUrl
-            }))
+      const todasNovedades = salones.map(s => ({
+        salon: s.salon,
+        novedades: s.infraestrutura
+          .filter(i => i.estado === 'Novedad Encontrada')
+          .map(i => ({
+            nombre: i.nombre,
+            hallazgo: i.hallazgo,
+            comentarios: i.comentarios,
+            imagenUrl: i.imagenUrl,
+            notificarCliente: i.notificarCliente
           }))
-        })
+      }))
+
+      const novedadesParaCliente = salones.map(s => ({
+        salon: s.salon,
+        novedades: s.infraestructura
+          .filter(i => i.estado === 'Novedad Encontrada')
+          .filter(i => i.hallazgo !== 'Existente' || i.notificarCliente)
+          .map(i => ({
+            nombre: i.nombre,
+            hallazgo: i.hallazgo,
+            comentarios: i.comentarios,
+            imagenUrl: i.imagenUrl
+          }))
+      })).filter(salon => salon.novedades.length > 0)
+
+      const actaBase = {
+        logo_url: getLogo(data.recinto),
+        title: 'Acta de Entrega de Áreas',
+        general: {
+          recinto: data.recinto,
+          nombreEvento: data.nombreEvento,
+          fechaEvento: data.fechaEvento,
+          tipo_entrega: data.tipoEntrega,
+          organizador: data.organizador,
+          encargado_entrega: data.encargadoEntrega,
+          persona_entrega: data.personaEntrega,
+          correo_persona: data.correoPersonaEntrega
+        }
       }
 
-  // Enviar correo (vía Function server-side)
-  await sendEmailWithAccountViaFunction(templateParams)
-      
+      const actaParaPool = { ...actaBase, salones: todasNovedades }
+      const actaParaCliente = { ...actaBase, salones: novedadesParaCliente }
+
+      const poolPayload = {
+        subject: `Acta de Entrega de Áreas | ${data.nombreEvento}`,
+        to_email: poolStr,
+        body: renderActaHtml(actaParaPool)
+      }
+
+      await sendEmailWithAccountViaFunction(poolPayload)
+
+      if (data.correoPersonaEntrega && novedadesParaCliente.length > 0) {
+        const clientePayload = {
+          subject: `Acta de Entrega de Áreas | ${data.nombreEvento}`,
+          to_email: data.correoPersonaEntrega,
+          body: renderActaHtml(actaParaCliente)
+        }
+        await sendEmailWithAccountViaFunction(clientePayload)
+      }
+
       showModalMessage(
         '¡Datos guardados correctamente!',
         'La información del acta está lista y se ha enviado por correo electrónico.',
