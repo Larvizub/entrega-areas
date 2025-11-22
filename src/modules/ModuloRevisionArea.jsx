@@ -9,6 +9,7 @@ import {
   getLogo 
 } from '../utils/constants'
 import ImageUpload from '../components/ImageUpload'
+import Modal from '../components/Modal'
 
 const ModuloRevisionArea = ({ onSave }) => {
   // Estados del formulario
@@ -20,6 +21,13 @@ const ModuloRevisionArea = ({ onSave }) => {
   const [encargadoEntrega, setEncargadoEntrega] = useState("")
   const [personaEntrega, setPersonaEntrega] = useState("")
   const [correoPersonaEntrega, setCorreoPersonaEntrega] = useState("")
+
+  const [showModal, setShowModal] = useState(false)
+  const [modalConfig, setModalConfig] = useState({ title: '', message: '', type: 'info' })
+  const setLocalModal = (title, message, type = 'info') => {
+    setModalConfig({ title, message, type })
+    setShowModal(true)
+  }
 
   // Infraestructura inicial
   const initialInfra = INFRAESTRUCTURA_ITEMS.map((item) => ({
@@ -75,6 +83,31 @@ const ModuloRevisionArea = ({ onSave }) => {
   }
 
   const handleGuardar = () => {
+    // Modal local para mostrar mensajes de validación
+
+    // Validación de campos generales obligatorios
+    const missing = []
+    if (!recinto) missing.push('Recinto')
+    if (!tipoEntrega) missing.push('Tipo de Entrega')
+    if (!nombreEvento) missing.push('Nombre del Evento')
+    if (!fechaEvento) missing.push('Fecha')
+    if (!organizador) missing.push('Organizador')
+    if (!encargadoEntrega) missing.push('Encargado de Entregar el Área')
+    if (!personaEntrega) missing.push('Persona a la que se le entrega')
+    if (!correoPersonaEntrega) missing.push('Correo de la persona')
+
+    if (missing.length > 0) {
+      setLocalModal('Campos obligatorios', `Por favor complete los siguientes campos obligatorios:\n- ${missing.join('\n- ')}`)
+      return
+    }
+
+    // Validar formato básico de correo
+    const emailRegex = /\S+@\S+\.\S+/;
+    if (correoPersonaEntrega && !emailRegex.test(correoPersonaEntrega)) {
+      setLocalModal('Correo inválido', 'Por favor ingrese un correo válido para la persona que recibe el área.')
+      return
+    }
+
     // Validación: si tipoEntrega es "Recepción" y hay un hallazgo "Nuevo", es obligatorio responder si entra en reporte de daños
     if (tipoEntrega === 'Recepción') {
       for (let s = 0; s < salonesData.length; s++) {
@@ -83,7 +116,7 @@ const ModuloRevisionArea = ({ onSave }) => {
           const it = infra[i]
           if (it.estado === 'Novedad Encontrada' && it.hallazgo === 'Nuevo') {
             if (it.esDano === null || typeof it.esDano === 'undefined') {
-              alert('Por favor responda si el hallazgo entra en el reporte de daños (Sí/No) para todos los hallazgos nuevos en Recepción.')
+              setLocalModal('Validación de daños', 'Por favor responda si el hallazgo entra en el reporte de daños (Sí/No) para todos los hallazgos nuevos en Recepción.')
               return
             }
           }
@@ -154,6 +187,7 @@ const ModuloRevisionArea = ({ onSave }) => {
                   <option key={r.value} value={r.value}>{r.label}</option>
                 ))}
               </select>
+              <label className="form-label">Tipo de Entrega:</label>
             </div>
 
             <div className="form-group">
@@ -169,6 +203,7 @@ const ModuloRevisionArea = ({ onSave }) => {
                   <option key={t.value} value={t.value}>{t.label}</option>
                 ))}
               </select>
+              <label className="form-label">Nombre del Evento:</label>
             </div>
 
             <div className="form-group">
@@ -178,6 +213,7 @@ const ModuloRevisionArea = ({ onSave }) => {
                 className="form-input"
                 value={nombreEvento}
                 onChange={(e) => setNombreEvento(e.target.value)}
+                required
               />
             </div>
 
@@ -188,6 +224,7 @@ const ModuloRevisionArea = ({ onSave }) => {
                 className="form-input"
                 value={fechaEvento}
                 onChange={(e) => setFechaEvento(e.target.value)}
+                required
               />
             </div>
 
@@ -198,6 +235,7 @@ const ModuloRevisionArea = ({ onSave }) => {
                 className="form-input"
                 value={organizador}
                 onChange={(e) => setOrganizador(e.target.value)}
+                required
               />
             </div>
 
@@ -208,6 +246,7 @@ const ModuloRevisionArea = ({ onSave }) => {
                 className="form-input"
                 value={encargadoEntrega}
                 onChange={(e) => setEncargadoEntrega(e.target.value)}
+                required
               />
             </div>
 
@@ -218,6 +257,7 @@ const ModuloRevisionArea = ({ onSave }) => {
                 className="form-input"
                 value={personaEntrega}
                 onChange={(e) => setPersonaEntrega(e.target.value)}
+                required
               />
             </div>
 
@@ -228,6 +268,7 @@ const ModuloRevisionArea = ({ onSave }) => {
                 className="form-input"
                 value={correoPersonaEntrega}
                 onChange={(e) => setCorreoPersonaEntrega(e.target.value)}
+                required
               />
             </div>
           </div>
@@ -416,6 +457,23 @@ const ModuloRevisionArea = ({ onSave }) => {
           Guardar
         </button>
       </div>
+
+      <Modal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        title={modalConfig.title}
+      >
+        <p className="mb-lg" style={{ whiteSpace: 'pre-wrap' }}>{modalConfig.message}</p>
+        <div className="flex justify-center">
+          <button
+            onClick={() => setShowModal(false)}
+            className={`btn ${modalConfig.type === 'error' ? 'btn-secondary' : 'btn-primary'}`}
+          >
+            {modalConfig.type === 'error' ? 'Entendido' : 'Aceptar'}
+          </button>
+        </div>
+      </Modal>
+
     </div>
   )
 }
