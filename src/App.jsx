@@ -55,10 +55,12 @@ export function App() {
     setShowSpinner(true)
     
     try {
-      const salones = (data.salones ?? []).map(salon => ({
-        ...salon,
-        infraestructura: salon.infraestructura ?? []
-      }))
+      const salones = Array.isArray(data.salones)
+        ? data.salones.map(salon => ({
+            ...(salon || {}),
+            infraestructura: Array.isArray(salon?.infraestructura) ? salon.infraestructura : []
+          }))
+        : []
       const hasDamages = salones.some(salon =>
         salon.infraestructura?.some(item => item.esDano === true)
       )
@@ -76,8 +78,8 @@ export function App() {
 
       const todasNovedades = salones.map(s => ({
         salon: s.salon,
-        novedades: s.infraestrutura
-          .filter(i => i.estado === 'Novedad Encontrada')
+        novedades: (s.infraestructura ?? [])
+          .filter(i => i && i.estado === 'Novedad Encontrada')
           .map(i => ({
             nombre: i.nombre,
             hallazgo: i.hallazgo,
@@ -89,9 +91,9 @@ export function App() {
 
       const novedadesParaCliente = salones.map(s => ({
         salon: s.salon,
-        novedades: s.infraestructura
-          .filter(i => i.estado === 'Novedad Encontrada')
-          .filter(i => i.hallazgo !== 'Existente' || i.notificarCliente)
+        novedades: (s.infraestructura ?? [])
+          .filter(i => i && i.estado === 'Novedad Encontrada')
+          .filter(i => i && (i.hallazgo !== 'Existente' || i.notificarCliente))
           .map(i => ({
             nombre: i.nombre,
             hallazgo: i.hallazgo,
