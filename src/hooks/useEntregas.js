@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'preact/hooks'
 import { ref, onValue, push, set, get } from 'firebase/database'
-import { db } from '../config/firebase'
+import { db as defaultDb } from '../config/firebase'
 
-export const useEntregas = () => {
+export const useEntregas = (database) => {
+  const db = database || defaultDb
   const [entregas, setEntregas] = useState([])
   const [loading, setLoading] = useState(true)
 

@@ -2,6 +2,7 @@ import { useState, useCallback } from 'preact/hooks'
 import { useAuth } from './hooks/useAuth'
 import { useEntregas } from './hooks/useEntregas'
 import { useUsuarios } from './hooks/useUsuarios'
+import { useTenant } from './hooks/useTenant'
 import { sendEmailWithAccountViaFunction } from './config/email'
 import { renderActaHtml } from './config/emailTemplates'
 import { getLogo } from './utils/constants'
@@ -28,9 +29,10 @@ export function App() {
     type: 'info' // 'success', 'error', 'info'
   })
   
-  const { user, userRole, loading } = useAuth()
-  const { entregas, saveEntrega, loading: entregasLoading } = useEntregas()
-  const { usuarios } = useUsuarios()
+  const { user, userRole, loading, db: authDb } = useAuth()
+  const { activeDb, setRecinto } = useTenant(user, authDb)
+  const { entregas, saveEntrega, loading: entregasLoading } = useEntregas(activeDb)
+  const { usuarios } = useUsuarios(activeDb)
 
   // Debug: mostrar información de conexión
   console.log('🔧 App Debug:', { 
@@ -174,7 +176,7 @@ export function App() {
 
     switch (currentModule) {
       case "revision":
-        return <ModuloRevisionArea onSave={handleSaveEntrega} />
+        return <ModuloRevisionArea onSave={handleSaveEntrega} onRecintoChange={setRecinto} />
       
       case "consulta":
         if (loading) {

@@ -45,4 +45,25 @@ const app = initializeApp(firebaseConfig)
 export const db = getDatabase(app)
 export const auth = getAuth(app)
 export const storage = getStorage(app)
+
+// Función para obtener la instancia de base de datos según la URL
+const dbInstances = {}
+
+export const getDatabaseByUrl = (url) => {
+  if (!url) return db
+  
+  if (!dbInstances[url]) {
+    console.log(`🔌 Conectando a base de datos: ${url}`)
+    dbInstances[url] = getDatabase(app, url)
+  }
+  
+  return dbInstances[url]
+}
+
+export const DATABASE_URLS = {
+  DEFAULT: import.meta.env.VITE_FIREBASE_DATABASE_URL,
+  CCCI: import.meta.env.VITE_FIREBASE_DATABASE_CCCI_URL,
+  CEVP: import.meta.env.VITE_FIREBASE_DATABASE_CEVP_URL
+}
+
 export default app

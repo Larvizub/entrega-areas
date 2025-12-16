@@ -1,21 +1,40 @@
 import { useState, useEffect } from 'preact/hooks'
 import { onAuthStateChanged, signInWithPopup, signOut, OAuthProvider } from 'firebase/auth'
 import { ref, onValue, push, set } from 'firebase/database'
-import { auth, db } from '../config/firebase'
+import { auth, db as defaultDb, getDatabaseByUrl, DATABASE_URLS } from '../config/firebase'
 
 export const useAuth = () => {
   const [user, setUser] = useState(null)
   const [userRole, setUserRole] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [currentDb, setCurrentDb] = useState(defaultDb)
 
   useEffect(() => {
+    let unsubscribeUsers = () => {}
+
     const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser)
+      
+      // Limpiar suscripción anterior si existe
+      unsubscribeUsers()
 
       if (firebaseUser) {
+        // Determinar la base de datos según el dominio
+        let dbUrl = DATABASE_URLS.DEFAULT
+        const email = firebaseUser.email?.toLowerCase() || ''
+        
+        if (email.endsWith('@cccartagena.com')) {
+          dbUrl = DATABASE_URLS.CCCI
+        } else if (email.endsWith('@valledelpacifico.co')) {
+          dbUrl = DATABASE_URLS.CEVP
+        }
+        
+        const tenantDb = getDatabaseByUrl(dbUrl)
+        setCurrentDb(tenantDb)
+
         // Buscar el rol del usuario en la base de datos
-        const usuariosRef = ref(db, "usuarios")
-        const unsubscribeUsers = onValue(usuariosRef, (snapshot) => {
+        const usuariosRef = ref(tenantDb, "usuarios")
+        unsubscribeUsers = onValue(usuariosRef, (snapshot) => {
           const data = snapshot.val()
           
           if (data) {
@@ -29,7 +48,7 @@ export const useAuth = () => {
             } else {
               // Usuario no encontrado, crearlo como usuario estándar
               console.log('� Auth Debug - Usuario no encontrado, creando como usuario estándar')
-              const newUsuarioRef = ref(db, "usuarios")
+              const newUsuarioRef = ref(tenantDenantDb, "usuarios")
               const userRef = push(newUsuarioRef)
               set(userRef, {
                 nombre: firebaseUser.displayName || firebaseUser.email.split('@')[0],
@@ -61,6 +80,7 @@ export const useAuth = () => {
       } else {
         setUserRole(null)
         setLoading(false)
+        setCurrentDb(defaultDb)
       }
     })
 
@@ -79,5 +99,5 @@ export const useAuth = () => {
     return signOut(auth)
   }
 
-  return { user, userRole, loading, login, logout }
+  return { user, userRole, loading, login, logout, db: currentDb }
 }

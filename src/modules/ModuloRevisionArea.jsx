@@ -11,7 +11,7 @@ import {
 import ImageUpload from '../components/ImageUpload'
 import Modal from '../components/Modal'
 
-const ModuloRevisionArea = ({ onSave }) => {
+const ModuloRevisionArea = ({ onSave, onRecintoChange }) => {
   // Estados del formulario
   const [recinto, setRecinto] = useState("")
   const [nombreEvento, setNombreEvento] = useState("")
@@ -140,6 +140,7 @@ const ModuloRevisionArea = ({ onSave }) => {
 
   const limpiarFormulario = () => {
     setRecinto("")
+    if (onRecintoChange) onRecintoChange("")
     setNombreEvento("")
     setFechaEvento("")
     setTipoEntrega("")
@@ -180,7 +181,11 @@ const ModuloRevisionArea = ({ onSave }) => {
               <select
                 className="form-select"
                 value={recinto}
-                onChange={(e) => setRecinto(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value
+                  setRecinto(val)
+                  if (onRecintoChange) onRecintoChange(val)
+                }}
               >
                 <option value="">Seleccione un recinto</option>
                 {RECINTOS.map(r => (

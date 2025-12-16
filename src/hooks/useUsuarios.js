@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'preact/hooks'
 import { ref, onValue, push, set, get, update, remove } from 'firebase/database'
-import { db } from '../config/firebase'
+import { db as defaultDb } from '../config/firebase'
 
-export const useUsuarios = () => {
+export const useUsuarios = (database) => {
+  const db = database || defaultDb
   const [usuarios, setUsuarios] = useState([])
   const [loading, setLoading] = useState(true)
 
